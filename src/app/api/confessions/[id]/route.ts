@@ -3,10 +3,11 @@ import { ConfessionService } from '@/services/confession-service'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const confession = await ConfessionService.getConfessionById(params.id)
+    const { id } = await params
+    const confession = await ConfessionService.getConfessionById(id)
     
     if (!confession) {
       return NextResponse.json(

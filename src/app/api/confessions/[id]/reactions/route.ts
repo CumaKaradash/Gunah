@@ -3,9 +3,10 @@ import { ConfessionService } from '@/services/confession-service'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
     const { reaction_type, user_id } = body
 
@@ -17,7 +18,7 @@ export async function POST(
     }
 
     await ConfessionService.addReaction({
-      confession_id: params.id,
+      confession_id: id,
       reaction_type,
       user_id: user_id || 'anonymous'
     })
@@ -34,15 +35,16 @@ export async function POST(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('user_id') || 'anonymous'
 
     const [reactions, userReaction] = await Promise.all([
-      ConfessionService.getConfessionReactions(params.id),
-      ConfessionService.getUserReaction(params.id, userId)
+      ConfessionService.getConfessionReactions(id),
+      ConfessionService.getUserReaction(id, userId)
     ])
 
     return NextResponse.json({
